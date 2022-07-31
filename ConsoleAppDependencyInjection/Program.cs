@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ConsoleAppDependencyInjection
@@ -10,7 +11,9 @@ namespace ConsoleAppDependencyInjection
     {
         static void Main(string[] args)
         {
-            UserInterface userInterface = new UserInterface();
+            IDataAccess dataAccess = new DataAccess();
+            IBuisness buisness = new BuisnessVer2(dataAccess);
+            UserInterface userInterface = new UserInterface(buisness);
             userInterface.GetData();
 
             Console.ReadKey();
@@ -18,6 +21,12 @@ namespace ConsoleAppDependencyInjection
     }
     class UserInterface
     {
+        private readonly IBuisness _buisness;
+
+        public UserInterface(IBuisness buisness)
+        {
+            _buisness = buisness;
+        }
         public void GetData()
         {
             Console.WriteLine("Enter Username");
@@ -26,12 +35,14 @@ namespace ConsoleAppDependencyInjection
             string password = Console.ReadLine();
 
             //IBuisness buisness = new Buisness();
-            IBuisness buisness = new BuisnessVer2();
-            buisness.SignUp(username, password);
+            IDataAccess access = new DataAccess();
+      
+            _buisness.SignUp(username, password);
         }
     }
     class Buisness : IBuisness
     {
+  
         public void SignUp(string username, string password)
         {
             if(username == "" || password == "")
@@ -42,12 +53,19 @@ namespace ConsoleAppDependencyInjection
             {
                 DataAccess dataAccess = new DataAccess();
                 dataAccess.Store(username, password);
+
                 Console.WriteLine($"You are signup as {username}");
             }
         }
     }
     class BuisnessVer2 : IBuisness
     {
+        private readonly IDataAccess _dataAccess;
+
+        public BuisnessVer2(IDataAccess dataAccess)
+        {
+            _dataAccess = dataAccess;
+        }
         public void SignUp(string username, string password)
         {
             if (username.Length < 3 || password.Length < 3)
@@ -56,8 +74,7 @@ namespace ConsoleAppDependencyInjection
             }
             else
             {
-                DataAccess dataAccess = new DataAccess();
-                dataAccess.Store(username, password);
+                _dataAccess.Store(username, password);
                 Console.WriteLine($"You are signup as {username}");
             }
         }
@@ -67,6 +84,7 @@ namespace ConsoleAppDependencyInjection
         public void Store(string username, string password)
         {
             Console.WriteLine("Storing in db...");
+            Thread.Sleep(1000);
         }
     }
     interface IDataAccess
