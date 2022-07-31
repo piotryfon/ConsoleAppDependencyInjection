@@ -25,11 +25,12 @@ namespace ConsoleAppDependencyInjection
             Console.WriteLine("Enter Password");
             string password = Console.ReadLine();
 
-            Buisness buisness = new Buisness();
+            //IBuisness buisness = new Buisness();
+            IBuisness buisness = new BuisnessVer2();
             buisness.SignUp(username, password);
         }
     }
-    class Buisness
+    class Buisness : IBuisness
     {
         public void SignUp(string username, string password)
         {
@@ -43,14 +44,37 @@ namespace ConsoleAppDependencyInjection
                 dataAccess.Store(username, password);
                 Console.WriteLine($"You are signup as {username}");
             }
- 
         }
     }
-    class DataAccess
+    class BuisnessVer2 : IBuisness
+    {
+        public void SignUp(string username, string password)
+        {
+            if (username.Length < 3 || password.Length < 3)
+            {
+                Console.WriteLine("Signup failed, to short username or password...");
+            }
+            else
+            {
+                DataAccess dataAccess = new DataAccess();
+                dataAccess.Store(username, password);
+                Console.WriteLine($"You are signup as {username}");
+            }
+        }
+    }
+    class DataAccess : IDataAccess
     {
         public void Store(string username, string password)
         {
             Console.WriteLine("Storing in db...");
         }
+    }
+    interface IDataAccess
+    {
+       void Store(string username, string password);
+    }
+    interface IBuisness
+    {
+        void SignUp(string username, string password);
     }
 }
